@@ -18,7 +18,8 @@
             background: #8B0000;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
+            padding: 0 20px;
             position: fixed;
             top: 0;
             left: 0;
@@ -42,6 +43,38 @@
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
+        }
+
+        .header-icon {
+            width: 30px;
+            height: 30px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        .header-icon:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .header-icon:active {
+            transform: scale(0.95);
+        }
+
+        .header-icon span {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 700;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
 
         .loader {
@@ -85,6 +118,9 @@
 
     <div class="header" id="header">
         <span class="header-text">barberzhon</span>
+        <div class="header-icon" id="iconBtn" onclick="handleIconClick()">
+            <span>¡</span>
+        </div>
     </div>
 
     <script>
@@ -95,6 +131,10 @@
                 document.getElementById('loader').remove();
             }, 500);
         }, 3000);
+
+        function handleIconClick() {
+            alert('Нажато!');
+        }
     </script>
 </body>
 </html>
