@@ -23,6 +23,12 @@
             top: 0;
             left: 0;
             z-index: 10000;
+            transition: opacity 0.5s ease;
+        }
+
+        .header.hidden {
+            opacity: 0;
+            pointer-events: none;
         }
 
         .header-text {
@@ -46,7 +52,6 @@
             justify-content: center;
             z-index: 9999;
             transition: opacity 0.5s ease;
-            margin-top: 50px;
         }
 
         .loader.hidden {
@@ -70,7 +75,7 @@
     </style>
 </head>
 <body>
-    <div class="header">
+    <div class="header" id="header">
         <span class="header-text">barberzhon</span>
     </div>
 
@@ -81,6 +86,7 @@
     <script>
         setTimeout(() => {
             document.getElementById('loader').classList.add('hidden');
+            document.getElementById('header').classList.remove('hidden');
             setTimeout(() => {
                 document.getElementById('loader').remove();
             }, 500);
