@@ -138,12 +138,16 @@
         }
 
         .overlay-text {
-            font-size: clamp(32px, 10vw, 72px);
+            font-size: clamp(16px, 4vw, 28px);
             font-weight: 700;
             color: #8B0000;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             user-select: none;
             -webkit-user-select: none;
+            text-align: center;
+            padding: 0 30px;
+            line-height: 1.5;
+            max-width: 800px;
         }
 
         .back-btn {
@@ -206,7 +210,7 @@
     </div>
 
     <div class="overlay" id="overlay">
-        <div class="overlay-text">Text</div>
+        <div class="overlay-text">Этот сайт создан для того, чтобы мой автоответчик реагировал на ваши запросы и отвечал вам как бот в Telegram. Почему он не в Telegram? Так как я нахожусь в стране, где действует блокировка Telegram, которая мешает боту нормально функционировать.</div>
         <button class="back-btn" onclick="hideOverlay()">Назад</button>
     </div>
 
