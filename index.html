@@ -115,6 +115,63 @@
             100% { transform: rotate(360deg); }
         }
 
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            z-index: 10001;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .overlay-text {
+            font-size: clamp(32px, 10vw, 72px);
+            font-weight: 700;
+            color: #8B0000;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .back-btn {
+            position: absolute;
+            bottom: 40px;
+            padding: 15px 50px;
+            background: #8B0000;
+            color: #ffffff;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(139, 0, 0, 0.3);
+        }
+
+        .back-btn:active {
+            transform: translateY(0);
+        }
+
         @media (max-width: 480px) {
             .header-icon {
                 width: 28px;
@@ -139,13 +196,18 @@
 
     <div class="header" id="header">
         <span class="header-text">barberzhon</span>
-        <div class="header-icon" id="iconBtn" onclick="handleIconClick()">
+        <div class="header-icon" id="iconBtn" onclick="showOverlay()">
             <svg viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="10"/>
                 <line x1="12" y1="8" x2="12" y2="12"/>
                 <line x1="12" y1="16" x2="12.01" y2="16"/>
             </svg>
         </div>
+    </div>
+
+    <div class="overlay" id="overlay">
+        <div class="overlay-text">Text</div>
+        <button class="back-btn" onclick="hideOverlay()">Назад</button>
     </div>
 
     <script>
@@ -157,8 +219,12 @@
             }, 500);
         }, 3000);
 
-        function handleIconClick() {
-            alert('Нажато!');
+        function showOverlay() {
+            document.getElementById('overlay').classList.add('active');
+        }
+
+        function hideOverlay() {
+            document.getElementById('overlay').classList.remove('active');
         }
     </script>
 </body>
