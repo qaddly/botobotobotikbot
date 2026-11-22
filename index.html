@@ -18,9 +18,10 @@
             text-transform: uppercase; margin-left: 20px; user-select: none;
         }
         .header-nick {
-            color: #ffffff; font-size: 16px; font-weight: 600; cursor: pointer;
+            color: #ffffff; font-size: 22px; font-weight: 700; cursor: pointer;
             user-select: none; margin-left: auto; margin-right: auto;
-            padding: 5px 15px; border-radius: 4px; transition: background 0.2s ease;
+            padding: 8px 20px; border-radius: 6px; transition: background 0.2s ease;
+            letter-spacing: 1px;
         }
         .header-nick:hover { background: rgba(255, 255, 255, 0.15); }
         .header-icon {
@@ -30,7 +31,7 @@
             transition: background 0.3s ease, transform 0.2s ease; user-select: none;
         }
         .header-icon:hover { background: rgba(255, 255, 255, 0.25); transform: scale(1.1); }
-        .header-icon svg { width: 18px; height: 18px; fill: none; stroke: #fff; stroke-width: 2; }
+        .header-icon svg { width: 18px; height: 18px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
         .loader {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #ffffff; display: flex; align-items: center;
@@ -101,7 +102,7 @@
         <span class="header-left">barberzhon</span>
         <span class="header-nick" id="headerNick" onclick="showNickOverlay()" style="display:none;"></span>
         <div class="header-icon" id="iconBtn" onclick="showOverlay()">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
         </div>
     </div>
     <div class="modal-overlay" id="modalOverlay">
