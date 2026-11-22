@@ -30,7 +30,7 @@
             opacity: 1;
         }
 
-        .header-text {
+        .header-left {
             color: #ffffff;
             font-size: 18px;
             font-weight: 600;
@@ -42,6 +42,26 @@
             -moz-user-select: none;
             -ms-user-select: none;
             margin-left: 20px;
+        }
+
+        .header-nick {
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 5px 15px;
+            border-radius: 4px;
+            transition: background 0.2s ease;
+        }
+
+        .header-nick:hover {
+            background: rgba(255, 255, 255, 0.15);
         }
 
         .header-icon {
@@ -115,6 +135,115 @@
             100% { transform: rotate(360deg); }
         }
 
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 20000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #8B0000;
+            margin-bottom: 10px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .modal p {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 25px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .modal input {
+            width: 100%;
+            padding: 14px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s ease;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            box-sizing: border-box;
+        }
+
+        .modal input:focus {
+            border-color: #8B0000;
+        }
+
+        .modal input::placeholder {
+            color: #bbb;
+        }
+
+        .modal-btn {
+            width: 100%;
+            padding: 14px;
+            background: #8B0000;
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background 0.3s ease, transform 0.2s ease;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .modal-btn:hover {
+            background: #a00000;
+            transform: translateY(-2px);
+        }
+
+        .modal-btn:active {
+            transform: translateY(0);
+        }
+
+        .modal-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .modal-error {
+            color: #8B0000;
+            font-size: 13px;
+            margin-top: 10px;
+            min-height: 18px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
         .overlay {
             position: fixed;
             top: 0;
@@ -186,9 +315,12 @@
                 width: 15px;
                 height: 15px;
             }
-            .header-text {
+            .header-left {
                 font-size: 14px;
                 letter-spacing: 1px;
+            }
+            .header-nick {
+                font-size: 13px;
             }
         }
     </style>
@@ -199,7 +331,8 @@
     </div>
 
     <div class="header" id="header">
-        <span class="header-text">barberzhon</span>
+        <span class="header-left">barberzhon</span>
+        <span class="header-nick" id="headerNick" onclick="showNickOverlay()" style="display:none;"></span>
         <div class="header-icon" id="iconBtn" onclick="showOverlay()">
             <svg viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="10"/>
@@ -209,12 +342,79 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <h2>Регистрация</h2>
+            <p>Придумайте никнейм, который будет сохранён навсегда</p>
+            <input type="text" id="nickInput" placeholder="Ваш никнейм" maxlength="20" autocomplete="off">
+            <button class="modal-btn" id="submitBtn" onclick="submitNick()">Войти</button>
+            <div class="modal-error" id="modalError"></div>
+        </div>
+    </div>
+
     <div class="overlay" id="overlay">
         <div class="overlay-text">Этот сайт создан для того, чтобы мой автоответчик реагировал на ваши запросы и отвечал вам как бот в Telegram. Почему он не в Telegram? Так как я нахожусь в стране, где действует блокировка Telegram, которая мешает боту нормально функционировать.</div>
         <button class="back-btn" onclick="hideOverlay()">Назад</button>
     </div>
 
     <script>
+        const STORAGE_KEY = 'site_nick';
+
+        // Check if user already registered
+        const savedNick = localStorage.getItem(STORAGE_KEY);
+        if (savedNick) {
+            document.getElementById('headerNick').textContent = savedNick;
+            document.getElementById('headerNick').style.display = 'block';
+        } else {
+            setTimeout(() => {
+                document.getElementById('modalOverlay').classList.add('active');
+            }, 3500);
+        }
+
+        // Enter key support
+        document.getElementById('nickInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') submitNick();
+        });
+
+        // Live validation
+        document.getElementById('nickInput').addEventListener('input', () => {
+            document.getElementById('modalError').textContent = '';
+        });
+
+        function submitNick() {
+            const input = document.getElementById('nickInput');
+            const error = document.getElementById('modalError');
+            const nick = input.value.trim();
+
+            if (!nick) {
+                error.textContent = 'Введите никнейм';
+                input.focus();
+                return;
+            }
+
+            if (nick.length < 2) {
+                error.textContent = 'Минимум 2 символа';
+                input.focus();
+                return;
+            }
+
+            if (!/^[a-zA-Zа-яА-ЯёЁ0-9_\-]+$/.test(nick)) {
+                error.textContent = 'Только буквы, цифры, _ и -';
+                input.focus();
+                return;
+            }
+
+            localStorage.setItem(STORAGE_KEY, nick);
+            document.getElementById('headerNick').textContent = nick;
+            document.getElementById('headerNick').style.display = 'block';
+            document.getElementById('modalOverlay').classList.remove('active');
+            input.value = '';
+        }
+
+        function showNickOverlay() {
+            alert('Вы: ' + localStorage.getItem(STORAGE_KEY));
+        }
+
         setTimeout(() => {
             document.getElementById('loader').classList.add('hidden');
             document.getElementById('header').classList.add('visible');
