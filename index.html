@@ -101,7 +101,14 @@
                 break;
             }
         }
-        if (!found) { setTimeout(() => { document.getElementById('modalOverlay').classList.add('active'); }, 3500); }
+        if (!found) { 
+            isLogin = false;
+            document.getElementById('modalTitle').textContent = 'Регистрация';
+            document.getElementById('modalDesc').textContent = 'Придумайте никнейм и пароль';
+            document.getElementById('submitBtn').textContent = 'Зарегистрироваться';
+            document.getElementById('switchLink').textContent = 'Уже есть аккаунт? Войти';
+            setTimeout(() => { document.getElementById('modalOverlay').classList.add('active'); }, 3500); 
+        }
     }
     document.getElementById('nickInput').addEventListener('keydown', e => { if (e.key === 'Tab') { e.preventDefault(); document.getElementById('passInput').focus(); } if (e.key === 'Enter') submitForm(); });
     document.getElementById('passInput').addEventListener('keydown', e => { if (e.key === 'Enter') submitForm(); });
