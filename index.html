@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>botobotobotikbot</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; }
         body { background: #ffffff; overflow: hidden; }
@@ -78,6 +79,9 @@
         <button class="back-btn" onclick="hideOverlay()">Назад</button>
     </div>
     <script>
+    const supabaseUrl = 'https://atxnpizloqrmcmgzxxih.supabase.co';
+    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0eG5waXpsb3FybWNtZ3h4aWgiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc2MjYwMjg5MywiZXhwIjowfQ.9pE3fZ8rN5mKxJqYvZ1pQwX7yR2tL6nM4oP8sU3vW5A';
+    const sb = supabase.createClient(supabaseUrl, supabaseAnonKey);
     const USER_KEY = 'site_user';
     let isLogin = false;
     setTimeout(() => { document.getElementById('loader').classList.add('hidden'); document.getElementById('header').classList.add('visible'); setTimeout(() => { document.getElementById('loader').remove(); }, 500); }, 3000);
@@ -87,12 +91,46 @@
     document.getElementById('nickInput').addEventListener('keydown', e => { if (e.key === 'Tab') { e.preventDefault(); document.getElementById('passInput').focus(); } if (e.key === 'Enter') submitForm(); });
     document.getElementById('passInput').addEventListener('keydown', e => { if (e.key === 'Enter') submitForm(); });
     function toggleMode() { isLogin = !isLogin; document.getElementById('modalTitle').textContent = isLogin ? 'Вход' : 'Регистрация'; document.getElementById('modalDesc').textContent = isLogin ? 'Введите никнейм и пароль' : 'Придумайте никнейм и пароль'; document.getElementById('submitBtn').textContent = isLogin ? 'Войти' : 'Зарегистрироваться'; document.getElementById('modalError').textContent = ''; document.getElementById('modalLoading').textContent = ''; document.getElementById('switchLink').textContent = isLogin ? 'Нет аккаунта? Зарегистрироваться' : 'Уже есть аккаунт? Войти'; }
-    function submitForm() { const nick = document.getElementById('nickInput').value.trim(); const pass = document.getElementById('passInput').value; const err = document.getElementById('modalError'); const load = document.getElementById('modalLoading'); const btn = document.getElementById('submitBtn'); err.textContent = ''; if (!nick) { err.textContent = 'Введите никнейм'; return; } if (nick.length < 2) { err.textContent = 'Минимум 2 символа'; return; } if (!/^[a-zA-Zа-яА-ЯёЁ0-9_\-]+$/.test(nick)) { err.textContent = 'Только буквы, цифры, _ и -'; return; } if (!pass) { err.textContent = 'Введите пароль'; return; } if (pass.length < 4) { err.textContent = 'Минимум 4 символа'; return; } btn.disabled = true; load.textContent = isLogin ? 'Проверка...' : 'Регистрация...'; if (isLogin) { const user = JSON.parse(localStorage.getItem('user_' + nick.toLowerCase())); if (!user) { err.textContent = 'Пользователь не найден'; btn.disabled = false; load.textContent = ''; return; } if (user.pass !== pass) { err.textContent = 'Неверный пароль'; btn.disabled = false; load.textContent = ''; return; } localStorage.setItem(USER_KEY, JSON.stringify({ nick: user.nick, pass })); document.getElementById('headerNick').textContent = user.nick; document.getElementById('headerNick').style.display = 'block'; document.getElementById('modalOverlay').classList.remove('active'); document.getElementById('nickInput').value = ''; document.getElementById('passInput').value = ''; btn.disabled = false; load.textContent = ''; } else { localStorage.setItem('user_' + nick.toLowerCase(), JSON.stringify({ nick, pass })); localStorage.setItem(USER_KEY, JSON.stringify({ nick, pass })); document.getElementById('headerNick').textContent = nick; document.getElementById('headerNick').style.display = 'block'; document.getElementById('modalOverlay').classList.remove('active'); document.getElementById('nickInput').value = ''; document.getElementById('passInput').value = ''; btn.disabled = false; load.textContent = ''; } }
+    async function submitForm() {
+        const nick = document.getElementById('nickInput').value.trim();
+        const pass = document.getElementById('passInput').value;
+        const err = document.getElementById('modalError');
+        const load = document.getElementById('modalLoading');
+        const btn = document.getElementById('submitBtn');
+        err.textContent = '';
+        if (!nick) { err.textContent = 'Введите никнейм'; return; }
+        if (nick.length < 2) { err.textContent = 'Минимум 2 символа'; return; }
+        if (!/^[a-zA-Zа-яА-ЯёЁ0-9_\-]+$/.test(nick)) { err.textContent = 'Только буквы, цифры, _ и -'; return; }
+        if (!pass) { err.textContent = 'Введите пароль'; return; }
+        if (pass.length < 4) { err.textContent = 'Минимум 4 символа'; return; }
+        btn.disabled = true;
+        load.textContent = isLogin ? 'Проверка...' : 'Регистрация...';
+        try {
+            if (isLogin) {
+                const { data: user, error } = await sb.from('nicks').select('*').eq('nick', nick.toLowerCase()).single();
+                if (error || !user) { err.textContent = 'Пользователь не найден'; btn.disabled = false; load.textContent = ''; return; }
+                if (user.password !== pass) { err.textContent = 'Неверный пароль'; btn.disabled = false; load.textContent = ''; return; }
+                localStorage.setItem(USER_KEY, JSON.stringify({ nick: user.nick, pass }));
+                document.getElementById('headerNick').textContent = user.nick;
+                document.getElementById('headerNick').style.display = 'block';
+                document.getElementById('modalOverlay').classList.remove('active');
+                document.getElementById('nickInput').value = '';
+                document.getElementById('passInput').value = '';
+                btn.disabled = false; load.textContent = '';
+            } else {
+                const { data: exists } = await sb.from('nicks').select('id').eq('nick', nick.toLowerCase()).single();
+                if (exists) { err.textContent = 'Этот ник уже занят'; btn.disabled = false; load.textContent = ''; return; }
+                const { error } = await sb.from('nicks').insert([{ nick: nick.toLowerCase(), password: pass }]);
+                if (error) { err.textContent = 'Ошибка регистрации'; btn.disabled = false; load.textContent = ''; return; }
+                localStorage.setItem(USER_KEY, JSON.stringify({ nick, pass }));
+                document.getElementById('headerNick').textContent = nick;
+                document.getElementById('headerNick').style.display = 'block';
+                document.getElementById('modalOverlay').classList.remove('active');
+                document.getElementById('nickInput').value = '';
+                document.getElementById('passInput').value = '';
+                btn.disabled = false; load.textContent = '';
+            }
+        } catch (e) { err.textContent = 'Ошибка подключения'; btn.disabled = false; load.textContent = ''; console.error(e); }
+    }
     function toggleNickMenu() { document.getElementById('nickMenu').classList.toggle('active'); }
-    function logout() { localStorage.removeItem(USER_KEY); document.getElementById('headerNick').style.display = 'none'; document.getElementById('nickMenu').classList.remove('active'); isLogin = false; document.getElementById('modalTitle').textContent = 'Регистрация'; document.getElementById('modalDesc').textContent = 'Придумайте никнейм и пароль'; document.getElementById('submitBtn').textContent = 'Зарегистрироваться'; document.getElementById('switchLink').textContent = 'Нет аккаунта? Зарегистрироваться'; setTimeout(() => { document.getElementById('modalOverlay').classList.add('active'); }, 200); }
-    document.addEventListener('click', (e) => { const menu = document.getElementById('nickMenu'); const nick = document.getElementById('headerNick'); if (!menu.contains(e.target) && !nick.contains(e.target)) { menu.classList.remove('active'); } });
-    function showOverlay() { document.getElementById('overlay').classList.add('active'); }
-    function hideOverlay() { document.getElementById('overlay').classList.remove('active'); }
-    </script>
-</body>
-</html>
+    function logout() { localStorage.removeItem(USER_KEY); document.getElementById('headerNick').style.display = 'none'; document.getElementById('nickMenu').classList.remove('active'); isLogin = false; document.getElementById('modalTitle').textContent = 'Регистрация'; document.getElementById('modalDesc').textContent = 'Придумайте никнейм и пароль'; document.getElementById('submitBtn').textContent = 'Зарегистри
