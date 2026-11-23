@@ -82,6 +82,17 @@
     const supabaseUrl = 'https://atxnpizloqrmcmgzxxih.supabase.co';
     const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0eG5waXpsb3FybWNtZ3h4aWgiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc2MjYwMjg5MywiZXhwIjowfQ.9pE3fZ8rN5mKxJqYvZ1pQwX7yR2tL6nM4oP8sU3vW5A';
     const sb = supabase.createClient(supabaseUrl, supabaseAnonKey);
+    let useSupabase = false;
+    async function testSupabase() {
+        try {
+            await Promise.race([
+                sb.from('nicks').select('id').limit(1),
+                new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 3000))
+            ]);
+            useSupabase = true;
+        } catch (e) { useSupabase = false; }
+    }
+    testSupabase();
     const USER_KEY = 'site_user';
     let isLogin = false;
     setTimeout(() => { document.getElementById('loader').classList.add('hidden'); document.getElementById('header').classList.add('visible'); setTimeout(() => { document.getElementById('loader').remove(); }, 500); }, 3000);
@@ -106,7 +117,7 @@
         btn.disabled = true;
         load.textContent = isLogin ? 'Проверка...' : 'Регистрация...';
         try {
-            if (isLogin) {
+            if (useSupabase && isLogin) {
                 const { data: user, error } = await sb.from('nicks').select('*').eq('nick', nick.toLowerCase()).single();
                 if (error || !user) { err.textContent = 'Пользователь не найден'; btn.disabled = false; load.textContent = ''; return; }
                 if (user.password !== pass) { err.textContent = 'Неверный пароль'; btn.disabled = false; load.textContent = ''; return; }
@@ -117,7 +128,7 @@
                 document.getElementById('nickInput').value = '';
                 document.getElementById('passInput').value = '';
                 btn.disabled = false; load.textContent = '';
-            } else {
+            } else if (useSupabase && !isLogin) {
                 const { data: exists } = await sb.from('nicks').select('id').eq('nick', nick.toLowerCase()).single();
                 if (exists) { err.textContent = 'Этот ник уже занят'; btn.disabled = false; load.textContent = ''; return; }
                 const { error } = await sb.from('nicks').insert([{ nick: nick.toLowerCase(), password: pass }]);
@@ -129,8 +140,38 @@
                 document.getElementById('nickInput').value = '';
                 document.getElementById('passInput').value = '';
                 btn.disabled = false; load.textContent = '';
+            } else {
+                if (isLogin) {
+                    const user = JSON.parse(localStorage.getItem('user_' + nick.toLowerCase()));
+                    if (!user) { err.textContent = 'Пользователь не найден'; btn.disabled = false; load.textContent = ''; return; }
+                    if (user.pass !== pass) { err.textContent = 'Неверный пароль'; btn.disabled = false; load.textContent = ''; return; }
+                    localStorage.setItem(USER_KEY, JSON.stringify({ nick: user.nick, pass }));
+                    document.getElementById('headerNick').textContent = user.nick;
+                    document.getElementById('headerNick').style.display = 'block';
+                    document.getElementById('modalOverlay').classList.remove('active');
+                    document.getElementById('nickInput').value = '';
+                    document.getElementById('passInput').value = '';
+                    btn.disabled = false; load.textContent = '';
+                } else {
+                    if (localStorage.getItem('user_' + nick.toLowerCase())) { err.textContent = 'Этот ник уже занят'; btn.disabled = false; load.textContent = ''; return; }
+                    localStorage.setItem('user_' + nick.toLowerCase(), JSON.stringify({ nick, pass }));
+                    localStorage.setItem(USER_KEY, JSON.stringify({ nick, pass }));
+                    document.getElementById('headerNick').textContent = nick;
+                    document.getElementById('headerNick').style.display = 'block';
+                    document.getElementById('modalOverlay').classList.remove('active');
+                    document.getElementById('nickInput').value = '';
+                    document.getElementById('passInput').value = '';
+                    btn.disabled = false; load.textContent = '';
+                }
             }
-        } catch (e) { err.textContent = 'Ошибка подключения'; btn.disabled = false; load.textContent = ''; console.error(e); }
+        } catch (e) {
+            console.error(e);
+            err.textContent = 'Ошибка подключения'; btn.disabled = false; load.textContent = '';
+        }
     }
     function toggleNickMenu() { document.getElementById('nickMenu').classList.toggle('active'); }
-    function logout() { localStorage.removeItem(USER_KEY); document.getElementById('headerNick').style.display = 'none'; document.getElementById('nickMenu').classList.remove('active'); isLogin = false; document.getElementById('modalTitle').textContent = 'Регистрация'; document.getElementById('modalDesc').textContent = 'Придумайте никнейм и пароль'; document.getElementById('submitBtn').textContent = 'Зарегистри
+    function logout() { localStorage.removeItem(USER_KEY); document.getElementById('headerNick').style.display = 'none'; document.getElementById('nickMenu').classList.remove('active'); isLogin = false; document.getElementById('modalTitle').textContent = 'Регистрация'; document.getElementById('modalDesc').textContent = 'Придумайте никнейм и пароль'; document.getElementById('submitBtn').textContent = 'Зарегистрироваться'; document.getElementById('switchLink').textContent = 'Нет аккаунта? Зарегистрироваться'; setTimeout(() => { document.getElementById('modalOverlay').classList.add('active'); }, 200); }
+    document.addEventListener('click', (e) => { const menu = document.getElementById('nickMenu'); const nick = document.getElementById('headerNick'); if (!menu.contains(e.target) && !nick.contains(e.target)) { menu.classList.remove('active'); } });
+    function showOverlay() { document.getElementById('overlay').classList.add('active'); }
+    function hideOverlay() { document.getElementById('overlay').classList.remove('active'); }
+    </script>
