@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>botobotobotikbot</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; }
         body { background: #ffffff; overflow: hidden; }
@@ -39,7 +38,6 @@
         .modal-btn:hover { background: #a00000; transform: translateY(-2px); }
         .modal-btn:disabled { background: #ccc; cursor: not-allowed; transform: none; }
         .modal-error { color: #8B0000; font-size: 13px; margin-top: 10px; min-height: 18px; }
-        .modal-loading { color: #888; font-size: 14px; margin-top: 10px; min-height: 18px; }
         .modal-switch { margin-top: 15px; font-size: 14px; color: #888; }
         .modal-switch a { color: #8B0000; cursor: pointer; text-decoration: underline; }
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 10001; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s ease; }
@@ -70,7 +68,6 @@
             <input type="password" id="passInput" placeholder="Пароль" maxlength="30">
             <button class="modal-btn" id="submitBtn" onclick="submitForm()">Войти</button>
             <div class="modal-error" id="modalError"></div>
-            <div class="modal-loading" id="modalLoading"></div>
             <div class="modal-switch"><a id="switchLink" onclick="toggleMode()">Нет аккаунта? Зарегистрироваться</a></div>
         </div>
     </div>
@@ -79,42 +76,40 @@
         <button class="back-btn" onclick="hideOverlay()">Назад</button>
     </div>
     <script>
-    const supabaseUrl = 'https://atxnpizloqrmcmgzxxih.supabase.co';
-    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0eG5waXpsb3FybWNtZ3h4aWgiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc2MjYwMjg5MywiZXhwIjowfQ.9pE3fZ8rN5mKxJqYvZ1pQwX7yR2tL6nM4oP8sU3vW5A';
-    const sb = supabase.createClient(supabaseUrl, supabaseAnonKey);
-    let useSupabase = false;
-    async function testSupabase() {
-        try {
-            await Promise.race([
-                sb.from('nicks').select('id').limit(1),
-                new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 3000))
-            ]);
-            useSupabase = true;
-        } catch (e) { useSupabase = false; }
-    }
-    testSupabase();
-    const USER_KEY = 'site_user';
+    const USERS_KEY = 'all_users';
+    const SESSION_KEY = 'site_session';
     let isLogin = false;
+    function getUsers() { try { return JSON.parse(localStorage.getItem(USERS_KEY) || '{}'); } catch { return {}; } }
+    function saveUsers(u) { localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
+    function getSession() { try { return JSON.parse(localStorage.getItem(SESSION_KEY)); } catch { return null; } }
+    function setSession(nick, pass) { localStorage.setItem(SESSION_KEY, JSON.stringify({ nick, pass })); }
+    function clearSession() { localStorage.removeItem(SESSION_KEY); }
     setTimeout(() => { document.getElementById('loader').classList.add('hidden'); document.getElementById('header').classList.add('visible'); setTimeout(() => { document.getElementById('loader').remove(); }, 500); }, 3000);
-    const saved = localStorage.getItem(USER_KEY);
-    if (saved) { const user = JSON.parse(saved); document.getElementById('headerNick').textContent = user.nick; document.getElementById('headerNick').style.display = 'block'; }
-    else {
-        let found = false;
+    const session = getSession();
+    if (session) {
+        document.getElementById('headerNick').textContent = session.nick;
+        document.getElementById('headerNick').style.display = 'block';
+    } else {
         const users = getUsers();
-        for (const k in users) { if (users[k] && users[k].nick) { localStorage.setItem(USER_KEY, JSON.stringify({ nick: users[k].nick, pass: users[k].password })); document.getElementById('headerNick').textContent = users[k].nick; document.getElementById('headerNick').style.display = 'block'; found = true; break; } }
+        let found = false;
+        for (const k in users) {
+            if (users[k] && users[k].nick) {
+                setSession(users[k].nick, users[k].password);
+                document.getElementById('headerNick').textContent = users[k].nick;
+                document.getElementById('headerNick').style.display = 'block';
+                found = true;
+                break;
+            }
+        }
         if (!found) { setTimeout(() => { document.getElementById('modalOverlay').classList.add('active'); }, 3500); }
     }
     document.getElementById('nickInput').addEventListener('keydown', e => { if (e.key === 'Tab') { e.preventDefault(); document.getElementById('passInput').focus(); } if (e.key === 'Enter') submitForm(); });
     document.getElementById('passInput').addEventListener('keydown', e => { if (e.key === 'Enter') submitForm(); });
-    function toggleMode() { isLogin = !isLogin; document.getElementById('modalTitle').textContent = isLogin ? 'Вход' : 'Регистрация'; document.getElementById('modalDesc').textContent = isLogin ? 'Введите никнейм и пароль' : 'Придумайте никнейм и пароль'; document.getElementById('submitBtn').textContent = isLogin ? 'Войти' : 'Зарегистрироваться'; document.getElementById('modalError').textContent = ''; document.getElementById('modalLoading').textContent = ''; document.getElementById('switchLink').textContent = isLogin ? 'Нет аккаунта? Зарегистрироваться' : 'Уже есть аккаунт? Войти'; }
-    function getUsers() { try { return JSON.parse(localStorage.getItem('all_users') || '{}'); } catch { return {}; } }
-    function saveUsers(u) { localStorage.setItem('all_users', JSON.stringify(u)); }
-    function toggleMode() { isLogin = !isLogin; document.getElementById('modalTitle').textContent = isLogin ? 'Вход' : 'Регистрация'; document.getElementById('modalDesc').textContent = isLogin ? 'Введите никнейм и пароль' : 'Придумайте никнейм и пароль'; document.getElementById('submitBtn').textContent = isLogin ? 'Войти' : 'Зарегистрироваться'; document.getElementById('modalError').textContent = ''; document.getElementById('modalLoading').textContent = ''; document.getElementById('switchLink').textContent = isLogin ? 'Нет аккаунта? Зарегистрироваться' : 'Уже есть аккаунт? Войти'; }
-    async function submitForm() {
+    function toggleMode() { isLogin = !isLogin; document.getElementById('modalTitle').textContent = isLogin ? 'Вход' : 'Регистрация'; document.getElementById('modalDesc').textContent = isLogin ? 'Введите никнейм и пароль' : 'Придумайте никнейм и пароль'; document.getElementById('submitBtn').textContent = isLogin ? 'Войти' : 'Зарегистрироваться'; document.getElementById('modalError').textContent = ''; document.getElementById('switchLink').textContent = isLogin ? 'Нет аккаунта? Зарегистрироваться' : 'Уже есть аккаунт? Войти'; }
+    function submitForm() {
         const nick = document.getElementById('nickInput').value.trim();
         const pass = document.getElementById('passInput').value;
         const err = document.getElementById('modalError');
-        const load = document.getElementById('modalLoading');
         const btn = document.getElementById('submitBtn');
         err.textContent = '';
         if (!nick) { err.textContent = 'Введите никнейм'; return; }
@@ -123,67 +118,38 @@
         if (!pass) { err.textContent = 'Введите пароль'; return; }
         if (pass.length < 4) { err.textContent = 'Минимум 4 символа'; return; }
         btn.disabled = true;
-        load.textContent = isLogin ? 'Проверка...' : 'Регистрация...';
-        try {
-            if (useSupabase) {
-                if (isLogin) {
-                    const { data: user, error } = await sb.from('nicks').select('*').eq('nick', nick.toLowerCase()).single();
-                    if (error || !user) { err.textContent = 'Пользователь не найден'; btn.disabled = false; load.textContent = ''; return; }
-                    if (user.password !== pass) { err.textContent = 'Неверный пароль'; btn.disabled = false; load.textContent = ''; return; }
-                    localStorage.setItem(USER_KEY, JSON.stringify({ nick: user.nick, pass }));
-                    document.getElementById('headerNick').textContent = user.nick;
-                    document.getElementById('headerNick').style.display = 'block';
-                    document.getElementById('modalOverlay').classList.remove('active');
-                    document.getElementById('nickInput').value = '';
-                    document.getElementById('passInput').value = '';
-                    btn.disabled = false; load.textContent = '';
-                } else {
-                    const { data: exists } = await sb.from('nicks').select('id').eq('nick', nick.toLowerCase()).single();
-                    if (exists) { err.textContent = 'Этот ник уже занят'; btn.disabled = false; load.textContent = ''; return; }
-                    const { error } = await sb.from('nicks').insert([{ nick: nick.toLowerCase(), password: pass }]);
-                    if (error) { err.textContent = 'Ошибка регистрации'; btn.disabled = false; load.textContent = ''; return; }
-                    localStorage.setItem(USER_KEY, JSON.stringify({ nick, pass }));
-                    document.getElementById('headerNick').textContent = nick;
-                    document.getElementById('headerNick').style.display = 'block';
-                    document.getElementById('modalOverlay').classList.remove('active');
-                    document.getElementById('nickInput').value = '';
-                    document.getElementById('passInput').value = '';
-                    btn.disabled = false; load.textContent = '';
-                }
+        setTimeout(() => {
+            const users = getUsers();
+            const key = nick.toLowerCase();
+            if (isLogin) {
+                if (!users[key]) { err.textContent = 'Пользователь не найден'; btn.disabled = false; return; }
+                if (users[key].password !== pass) { err.textContent = 'Неверный пароль'; btn.disabled = false; return; }
+                setSession(users[key].nick, users[key].password);
+                document.getElementById('headerNick').textContent = users[key].nick;
+                document.getElementById('headerNick').style.display = 'block';
+                document.getElementById('modalOverlay').classList.remove('active');
+                document.getElementById('nickInput').value = '';
+                document.getElementById('passInput').value = '';
+                btn.disabled = false;
             } else {
-                const users = getUsers();
-                const key = nick.toLowerCase();
-                if (isLogin) {
-                    if (!users[key]) { err.textContent = 'Пользователь не найден'; btn.disabled = false; load.textContent = ''; return; }
-                    if (users[key].password !== pass) { err.textContent = 'Неверный пароль'; btn.disabled = false; load.textContent = ''; return; }
-                    localStorage.setItem(USER_KEY, JSON.stringify({ nick: users[key].nick, pass }));
-                    document.getElementById('headerNick').textContent = users[key].nick;
-                    document.getElementById('headerNick').style.display = 'block';
-                    document.getElementById('modalOverlay').classList.remove('active');
-                    document.getElementById('nickInput').value = '';
-                    document.getElementById('passInput').value = '';
-                    btn.disabled = false; load.textContent = '';
-                } else {
-                    if (users[key]) { err.textContent = 'Этот ник уже занят'; btn.disabled = false; load.textContent = ''; return; }
-                    users[key] = { nick: nick, password: pass };
-                    saveUsers(users);
-                    localStorage.setItem(USER_KEY, JSON.stringify({ nick, pass }));
-                    document.getElementById('headerNick').textContent = nick;
-                    document.getElementById('headerNick').style.display = 'block';
-                    document.getElementById('modalOverlay').classList.remove('active');
-                    document.getElementById('nickInput').value = '';
-                    document.getElementById('passInput').value = '';
-                    btn.disabled = false; load.textContent = '';
-                }
+                if (users[key]) { err.textContent = 'Этот ник уже занят'; btn.disabled = false; return; }
+                users[key] = { nick: nick, password: pass };
+                saveUsers(users);
+                setSession(nick, pass);
+                document.getElementById('headerNick').textContent = nick;
+                document.getElementById('headerNick').style.display = 'block';
+                document.getElementById('modalOverlay').classList.remove('active');
+                document.getElementById('nickInput').value = '';
+                document.getElementById('passInput').value = '';
+                btn.disabled = false;
             }
-        } catch (e) {
-            console.error(e);
-            err.textContent = 'Ошибка подключения'; btn.disabled = false; load.textContent = '';
-        }
+        }, 500);
     }
     function toggleNickMenu() { document.getElementById('nickMenu').classList.toggle('active'); }
-    function logout() { localStorage.removeItem(USER_KEY); document.getElementById('headerNick').style.display = 'none'; document.getElementById('nickMenu').classList.remove('active'); isLogin = false; document.getElementById('modalTitle').textContent = 'Регистрация'; document.getElementById('modalDesc').textContent = 'Придумайте никнейм и пароль'; document.getElementById('submitBtn').textContent = 'Зарегистрироваться'; document.getElementById('switchLink').textContent = 'Нет аккаунта? Зарегистрироваться'; setTimeout(() => { document.getElementById('modalOverlay').classList.add('active'); }, 200); }
+    function logout() { clearSession(); document.getElementById('headerNick').style.display = 'none'; document.getElementById('nickMenu').classList.remove('active'); isLogin = false; document.getElementById('modalTitle').textContent = 'Регистрация'; document.getElementById('modalDesc').textContent = 'Придумайте никнейм и пароль'; document.getElementById('submitBtn').textContent = 'Зарегистрироваться'; document.getElementById('switchLink').textContent = 'Нет аккаунта? Зарегистрироваться'; setTimeout(() => { document.getElementById('modalOverlay').classList.add('active'); }, 200); }
     document.addEventListener('click', (e) => { const menu = document.getElementById('nickMenu'); const nick = document.getElementById('headerNick'); if (!menu.contains(e.target) && !nick.contains(e.target)) { menu.classList.remove('active'); } });
     function showOverlay() { document.getElementById('overlay').classList.add('active'); }
     function hideOverlay() { document.getElementById('overlay').classList.remove('active'); }
     </script>
+</body>
+</html>
