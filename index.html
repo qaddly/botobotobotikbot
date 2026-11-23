@@ -7,145 +7,45 @@
     <style>
         * { margin: 0; padding: 0; }
         body { background: #ffffff; overflow: hidden; }
-        .header {
-            width: 100%; height: 50px; background: #8B0000;
-            display: flex; align-items: center; position: fixed; top: 0; left: 0;
-            z-index: 1000; opacity: 0; transition: opacity 0.5s ease;
-        }
+        .header { width: 100%; height: 50px; background: #8B0000; display: flex; align-items: center; position: fixed; top: 0; left: 0; z-index: 1000; opacity: 0; transition: opacity 0.5s ease; }
         .header.visible { opacity: 1; }
-        .header-left {
-            color: #ffffff; font-size: 18px; font-weight: 600; letter-spacing: 3px;
-            text-transform: uppercase; margin-left: 20px; user-select: none;
-        }
-        .header-nick {
-            color: #ffffff; font-size: 22px; font-weight: 700; cursor: pointer;
-            user-select: none; position: absolute; left: 50%; transform: translateX(-50%);
-            padding: 8px 20px; border-radius: 6px; transition: background 0.2s ease;
-            letter-spacing: 1px;
-        }
-        .header-nick:hover { background: rgba(255, 255, 255, 0.15); }
-
-        .nick-menu {
-            position: absolute;
-            top: 55px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-            padding: 8px 0;
-            min-width: 160px;
-            z-index: 10002;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.2s ease, visibility 0.2s ease;
-        }
-
-        .nick-menu.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .nick-menu-btn {
-            display: block;
-            width: 100%;
-            padding: 10px 20px;
-            border: none;
-            background: none;
-            font-size: 15px;
-            color: #333;
-            cursor: pointer;
-            text-align: center;
-            transition: background 0.2s ease;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
-
-        .nick-menu-btn:hover {
-            background: #f5f5f5;
-        }
-
-        .nick-menu-btn.danger {
-            color: #8B0000;
-        }
-
-        .nick-menu-btn.danger:hover {
-            background: #fff0f0;
-        }
-        .header-icon {
-            width: 32px; height: 32px; background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%; display: flex; align-items: center;
-            justify-content: center; cursor: pointer; margin-left: auto; margin-right: 20px;
-            transition: background 0.3s ease, transform 0.2s ease; user-select: none;
-        }
-        .header-icon:hover { background: rgba(255, 255, 255, 0.25); transform: scale(1.1); }
+        .header-left { color: #fff; font-size: 18px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; margin-left: 20px; user-select: none; }
+        .header-nick { color: #fff; font-size: 22px; font-weight: 700; cursor: pointer; user-select: none; position: absolute; left: 50%; transform: translateX(-50%); padding: 8px 20px; border-radius: 6px; transition: background 0.2s ease; letter-spacing: 1px; }
+        .header-nick:hover { background: rgba(255,255,255,0.15); }
+        .nick-menu { position: absolute; top: 55px; left: 50%; transform: translateX(-50%); background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); padding: 8px 0; min-width: 160px; z-index: 10002; opacity: 0; visibility: hidden; transition: opacity 0.2s ease, visibility 0.2s ease; }
+        .nick-menu.active { opacity: 1; visibility: visible; }
+        .nick-menu-btn { display: block; width: 100%; padding: 10px 20px; border: none; background: none; font-size: 15px; color: #333; cursor: pointer; text-align: center; transition: background 0.2s ease; font-family: sans-serif; }
+        .nick-menu-btn:hover { background: #f5f5f5; }
+        .nick-menu-btn.danger { color: #8B0000; }
+        .nick-menu-btn.danger:hover { background: #fff0f0; }
+        .header-icon { width: 32px; height: 32px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; margin-left: auto; margin-right: 20px; transition: background 0.3s ease, transform 0.2s ease; user-select: none; }
+        .header-icon:hover { background: rgba(255,255,255,0.25); transform: scale(1.1); }
         .header-icon svg { width: 18px; height: 18px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-        .loader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #ffffff; display: flex; align-items: center;
-            justify-content: center; z-index: 9999; transition: opacity 0.5s ease;
-        }
+        .loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; display: flex; align-items: center; justify-content: center; z-index: 9999; transition: opacity 0.5s ease; }
         .loader.hidden { opacity: 0; pointer-events: none; }
-        .spinner {
-            width: 60px; height: 60px; border: 4px solid #f0f0f0;
-            border-top: 4px solid #8B0000; border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
+        .spinner { width: 60px; height: 60px; border: 4px solid #f0f0f0; border-top: 4px solid #8B0000; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.6); z-index: 20000;
-            display: flex; align-items: center; justify-content: center;
-            opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 20000; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
         .modal-overlay.active { opacity: 1; visibility: visible; }
-        .modal {
-            background: #ffffff; border-radius: 20px; padding: 40px;
-            max-width: 420px; width: 90%; text-align: center;
-            transform: scale(0.9); transition: transform 0.3s ease;
-        }
+        .modal { background: #fff; border-radius: 20px; padding: 40px; max-width: 420px; width: 90%; text-align: center; transform: scale(0.9); transition: transform 0.3s ease; }
         .modal-overlay.active .modal { transform: scale(1); }
         .modal h2 { font-size: 24px; font-weight: 700; color: #8B0000; margin-bottom: 10px; }
         .modal p { font-size: 14px; color: #888; margin-bottom: 25px; }
-        .modal input {
-            width: 100%; padding: 14px 20px; border: 2px solid #e0e0e0;
-            border-radius: 12px; font-size: 16px; outline: none;
-            transition: border-color 0.3s ease; box-sizing: border-box; margin-bottom: 12px;
-        }
+        .modal input { width: 100%; padding: 14px 20px; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 16px; outline: none; transition: border-color 0.3s ease; box-sizing: border-box; margin-bottom: 12px; }
         .modal input:focus { border-color: #8B0000; }
         .modal input::placeholder { color: #bbb; }
-        .modal-btn {
-            width: 100%; padding: 14px; background: #8B0000; color: #fff;
-            border: none; border-radius: 12px; font-size: 16px; font-weight: 600;
-            cursor: pointer; margin-top: 5px; transition: background 0.3s ease, transform 0.2s ease;
-        }
+        .modal-btn { width: 100%; padding: 14px; background: #8B0000; color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 5px; transition: background 0.3s ease, transform 0.2s ease; }
         .modal-btn:hover { background: #a00000; transform: translateY(-2px); }
         .modal-btn:disabled { background: #ccc; cursor: not-allowed; transform: none; }
         .modal-error { color: #8B0000; font-size: 13px; margin-top: 10px; min-height: 18px; }
         .modal-loading { color: #888; font-size: 14px; margin-top: 10px; min-height: 18px; }
-        .modal-switch {
-            margin-top: 15px; font-size: 14px; color: #888;
-        }
-        .modal-switch a {
-            color: #8B0000; cursor: pointer; text-decoration: underline;
-        }
-        .overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #ffffff; z-index: 10001; display: flex;
-            flex-direction: column; align-items: center; justify-content: center;
-            opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s ease;
-        }
+        .modal-switch { margin-top: 15px; font-size: 14px; color: #888; }
+        .modal-switch a { color: #8B0000; cursor: pointer; text-decoration: underline; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 10001; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s ease; }
         .overlay.active { opacity: 1; visibility: visible; }
-        .overlay-text {
-            font-size: clamp(16px, 4vw, 28px); font-weight: 700; color: #8B0000;
-            text-align: center; padding: 0 30px; line-height: 1.5; max-width: 800px;
-        }
-        .back-btn {
-            position: absolute; bottom: 40px; padding: 15px 50px;
-            background: #8B0000; color: #fff; border: none; border-radius: 50px;
-            font-size: 18px; font-weight: 600; cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.3s ease;
-        }
-        .back-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(139, 0, 0, 0.3); }
+        .overlay-text { font-size: clamp(16px, 4vw, 28px); font-weight: 700; color: #8B0000; text-align: center; padding: 0 30px; line-height: 1.5; max-width: 800px; }
+        .back-btn { position: absolute; bottom: 40px; padding: 15px 50px; background: #8B0000; color: #fff; border: none; border-radius: 50px; font-size: 18px; font-weight: 600; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.3s ease; }
+        .back-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(139,0,0,0.3); }
         .back-btn:active { transform: translateY(0); }
     </style>
 </head>
@@ -170,9 +70,7 @@
             <button class="modal-btn" id="submitBtn" onclick="submitForm()">Войти</button>
             <div class="modal-error" id="modalError"></div>
             <div class="modal-loading" id="modalLoading"></div>
-            <div class="modal-switch">
-                <a id="switchLink" onclick="toggleMode()">Нет аккаунта? Зарегистрироваться</a>
-            </div>
+            <div class="modal-switch"><a id="switchLink" onclick="toggleMode()">Нет аккаунта? Зарегистрироваться</a></div>
         </div>
     </div>
     <div class="overlay" id="overlay">
@@ -180,161 +78,19 @@
         <button class="back-btn" onclick="hideOverlay()">Назад</button>
     </div>
     <script>
-    const SUPABASE_URL = 'https://atxnpizloqrmcmgzxxih.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_U9GWynNuOxoKLaoUdkZHng_zxtokWPp';
     const USER_KEY = 'site_user';
     let isLogin = false;
-
-    async function getAllNicks() {
-        try {
-            const r = await fetch(`${SUPABASE_URL}/rest/v1/nicks`, {
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`,
-                    'Prefer': 'return=representation'
-                }
-            });
-            if (!r.ok) {
-                console.log('Error fetching nicks:', r.status);
-                return [];
-            }
-            const data = await r.json();
-            console.log('Nicks:', data);
-            return data.map(x => x.nick);
-        } catch(e) {
-            console.log('Exception:', e);
-            return [];
-        }
-    }
-
-    async function getUserByNick(nick) {
-        try {
-            const r = await fetch(`${SUPABASE_URL}/rest/v1/nicks?select=nick,password&nick=eq.${encodeURIComponent(nick.toLowerCase())}`, {
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`
-                }
-            });
-            if (!r.ok) return null;
-            const data = await r.json();
-            return data.length > 0 ? data[0] : null;
-        } catch(e) { return null; }
-    }
-
-    async function addNick(nick, pass) {
-        await fetch(`${SUPABASE_URL}/rest/v1/nicks`, {
-            method: 'POST',
-            headers: {
-                'apikey': SUPABASE_KEY,
-                'Authorization': `Bearer ${SUPABASE_KEY}`,
-                'Content-Type': 'application/json',
-                'Prefer': 'return=representation'
-            },
-            body: JSON.stringify({ nick: nick.toLowerCase(), password: pass })
-        });
-    }
-
+    setTimeout(() => { document.getElementById('loader').classList.add('hidden'); document.getElementById('header').classList.add('visible'); setTimeout(() => { document.getElementById('loader').remove(); }, 500); }, 3000);
     const saved = localStorage.getItem(USER_KEY);
-    if (saved) {
-        const user = JSON.parse(saved);
-        document.getElementById('headerNick').textContent = user.nick;
-        document.getElementById('headerNick').style.display = 'block';
-    } else {
-        setTimeout(() => { document.getElementById('modalOverlay').classList.add('active'); }, 3500);
-    }
-
-    document.getElementById('nickInput').addEventListener('keydown', e => {
-        if (e.key === 'Tab') { e.preventDefault(); document.getElementById('passInput').focus(); }
-        if (e.key === 'Enter') submitForm();
-    });
+    if (saved) { const user = JSON.parse(saved); document.getElementById('headerNick').textContent = user.nick; document.getElementById('headerNick').style.display = 'block'; }
+    else { setTimeout(() => { document.getElementById('modalOverlay').classList.add('active'); }, 3500); }
+    document.getElementById('nickInput').addEventListener('keydown', e => { if (e.key === 'Tab') { e.preventDefault(); document.getElementById('passInput').focus(); } if (e.key === 'Enter') submitForm(); });
     document.getElementById('passInput').addEventListener('keydown', e => { if (e.key === 'Enter') submitForm(); });
-
-    function toggleMode() {
-        isLogin = !isLogin;
-        document.getElementById('modalTitle').textContent = isLogin ? 'Вход' : 'Регистрация';
-        document.getElementById('modalDesc').textContent = isLogin ? 'Введите никнейм и пароль' : 'Придумайте никнейм и пароль';
-        document.getElementById('submitBtn').textContent = isLogin ? 'Войти' : 'Зарегистрироваться';
-        document.getElementById('modalError').textContent = '';
-        document.getElementById('modalLoading').textContent = '';
-        document.getElementById('switchLink').textContent = isLogin ? 'Нет аккаунта? Зарегистрироваться' : 'Уже есть аккаунт? Войти';
-    }
-
-    async function submitForm() {
-        const nick = document.getElementById('nickInput').value.trim();
-        const pass = document.getElementById('passInput').value;
-        const err = document.getElementById('modalError');
-        const load = document.getElementById('modalLoading');
-        const btn = document.getElementById('submitBtn');
-
-        err.textContent = '';
-        if (!nick) { err.textContent = 'Введите никнейм'; return; }
-        if (nick.length < 2) { err.textContent = 'Минимум 2 символа'; return; }
-        if (!/^[a-zA-Zа-яА-ЯёЁ0-9_\-]+$/.test(nick)) { err.textContent = 'Только буквы, цифры, _ и -'; return; }
-        if (!pass) { err.textContent = 'Введите пароль'; return; }
-        if (pass.length < 4) { err.textContent = 'Минимум 4 символа'; return; }
-
-        btn.disabled = true;
-        load.textContent = isLogin ? 'Проверка...' : 'Проверка никнейма...';
-
-        if (isLogin) {
-            const user = await getUserByNick(nick);
-            if (!user) { err.textContent = 'Пользователь не найден'; btn.disabled = false; load.textContent = ''; return; }
-            if (user.password !== pass) { err.textContent = 'Неверный пароль'; btn.disabled = false; load.textContent = ''; return; }
-
-            localStorage.setItem(USER_KEY, JSON.stringify({ nick: user.nick, pass }));
-            document.getElementById('headerNick').textContent = user.nick;
-            document.getElementById('headerNick').style.display = 'block';
-            document.getElementById('modalOverlay').classList.remove('active');
-            document.getElementById('nickInput').value = '';
-            document.getElementById('passInput').value = '';
-            btn.disabled = false;
-            load.textContent = '';
-        } else {
-            const nicks = await getAllNicks();
-            if (nicks.includes(nick.toLowerCase())) { err.textContent = 'Этот никнейм уже занят'; btn.disabled = false; load.textContent = ''; return; }
-
-            load.textContent = 'Регистрация...';
-            await addNick(nick, pass);
-            localStorage.setItem(USER_KEY, JSON.stringify({ nick, pass }));
-
-            document.getElementById('headerNick').textContent = nick;
-            document.getElementById('headerNick').style.display = 'block';
-            document.getElementById('modalOverlay').classList.remove('active');
-            document.getElementById('nickInput').value = '';
-            document.getElementById('passInput').value = '';
-            btn.disabled = false;
-            load.textContent = '';
-        }
-    }
-
-    function toggleNickMenu() {
-        document.getElementById('nickMenu').classList.toggle('active');
-    }
-
-    function logout() {
-        localStorage.removeItem(USER_KEY);
-        document.getElementById('headerNick').style.display = 'none';
-        document.getElementById('nickMenu').classList.remove('active');
-        isLogin = false;
-        document.getElementById('modalTitle').textContent = 'Регистрация';
-        document.getElementById('modalDesc').textContent = 'Придумайте никнейм и пароль';
-        document.getElementById('submitBtn').textContent = 'Зарегистрироваться';
-        document.getElementById('switchLink').textContent = 'Нет аккаунта? Зарегистрироваться';
-        setTimeout(() => { document.getElementById('modalOverlay').classList.add('active'); }, 200);
-    }
-
-    document.addEventListener('click', (e) => {
-        const menu = document.getElementById('nickMenu');
-        const nick = document.getElementById('headerNick');
-        if (!menu.contains(e.target) && !nick.contains(e.target)) {
-            menu.classList.remove('active');
-        }
-    });
-    setTimeout(() => {
-        document.getElementById('loader').classList.add('hidden');
-        document.getElementById('header').classList.add('visible');
-        setTimeout(() => { document.getElementById('loader').remove(); }, 500);
-    }, 3000);
+    function toggleMode() { isLogin = !isLogin; document.getElementById('modalTitle').textContent = isLogin ? 'Вход' : 'Регистрация'; document.getElementById('modalDesc').textContent = isLogin ? 'Введите никнейм и пароль' : 'Придумайте никнейм и пароль'; document.getElementById('submitBtn').textContent = isLogin ? 'Войти' : 'Зарегистрироваться'; document.getElementById('modalError').textContent = ''; document.getElementById('modalLoading').textContent = ''; document.getElementById('switchLink').textContent = isLogin ? 'Нет аккаунта? Зарегистрироваться' : 'Уже есть аккаунт? Войти'; }
+    function submitForm() { const nick = document.getElementById('nickInput').value.trim(); const pass = document.getElementById('passInput').value; const err = document.getElementById('modalError'); const load = document.getElementById('modalLoading'); const btn = document.getElementById('submitBtn'); err.textContent = ''; if (!nick) { err.textContent = 'Введите никнейм'; return; } if (nick.length < 2) { err.textContent = 'Минимум 2 символа'; return; } if (!/^[a-zA-Zа-яА-ЯёЁ0-9_\-]+$/.test(nick)) { err.textContent = 'Только буквы, цифры, _ и -'; return; } if (!pass) { err.textContent = 'Введите пароль'; return; } if (pass.length < 4) { err.textContent = 'Минимум 4 символа'; return; } btn.disabled = true; load.textContent = isLogin ? 'Проверка...' : 'Регистрация...'; if (isLogin) { const user = JSON.parse(localStorage.getItem('user_' + nick.toLowerCase())); if (!user) { err.textContent = 'Пользователь не найден'; btn.disabled = false; load.textContent = ''; return; } if (user.pass !== pass) { err.textContent = 'Неверный пароль'; btn.disabled = false; load.textContent = ''; return; } localStorage.setItem(USER_KEY, JSON.stringify({ nick: user.nick, pass })); document.getElementById('headerNick').textContent = user.nick; document.getElementById('headerNick').style.display = 'block'; document.getElementById('modalOverlay').classList.remove('active'); document.getElementById('nickInput').value = ''; document.getElementById('passInput').value = ''; btn.disabled = false; load.textContent = ''; } else { localStorage.setItem('user_' + nick.toLowerCase(), JSON.stringify({ nick, pass })); localStorage.setItem(USER_KEY, JSON.stringify({ nick, pass })); document.getElementById('headerNick').textContent = nick; document.getElementById('headerNick').style.display = 'block'; document.getElementById('modalOverlay').classList.remove('active'); document.getElementById('nickInput').value = ''; document.getElementById('passInput').value = ''; btn.disabled = false; load.textContent = ''; } }
+    function toggleNickMenu() { document.getElementById('nickMenu').classList.toggle('active'); }
+    function logout() { localStorage.removeItem(USER_KEY); document.getElementById('headerNick').style.display = 'none'; document.getElementById('nickMenu').classList.remove('active'); isLogin = false; document.getElementById('modalTitle').textContent = 'Регистрация'; document.getElementById('modalDesc').textContent = 'Придумайте никнейм и пароль'; document.getElementById('submitBtn').textContent = 'Зарегистрироваться'; document.getElementById('switchLink').textContent = 'Нет аккаунта? Зарегистрироваться'; setTimeout(() => { document.getElementById('modalOverlay').classList.add('active'); }, 200); }
+    document.addEventListener('click', (e) => { const menu = document.getElementById('nickMenu'); const nick = document.getElementById('headerNick'); if (!menu.contains(e.target) && !nick.contains(e.target)) { menu.classList.remove('active'); } });
     function showOverlay() { document.getElementById('overlay').classList.add('active'); }
     function hideOverlay() { document.getElementById('overlay').classList.remove('active'); }
     </script>
