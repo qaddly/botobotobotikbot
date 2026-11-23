@@ -55,6 +55,7 @@
         <span class="header-nick" id="headerNick" onclick="toggleNickMenu()" style="display:none;"></span>
         <div class="nick-menu" id="nickMenu">
             <button class="nick-menu-btn danger" onclick="logout()">Выйти</button>
+            <button class="nick-menu-btn danger" onclick="deleteAccount()">Удалить аккаунт</button>
         </div>
         <div class="header-icon" id="iconBtn" onclick="showOverlay()">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
@@ -140,6 +141,7 @@
                 btn.disabled = false;
             } else {
                 if (users[key]) { err.textContent = 'Этот ник уже занят'; btn.disabled = false; return; }
+                if (Object.keys(users).length >= 2) { err.textContent = 'Максимум 2 аккаунта'; btn.disabled = false; return; }
                 users[key] = { nick: nick, password: pass };
                 saveUsers(users);
                 setSession(nick, pass);
@@ -154,6 +156,15 @@
     }
     function toggleNickMenu() { document.getElementById('nickMenu').classList.toggle('active'); }
     function logout() { clearSession(); document.getElementById('headerNick').style.display = 'none'; document.getElementById('nickMenu').classList.remove('active'); isLogin = false; document.getElementById('modalTitle').textContent = 'Регистрация'; document.getElementById('modalDesc').textContent = 'Придумайте никнейм и пароль'; document.getElementById('submitBtn').textContent = 'Зарегистрироваться'; document.getElementById('switchLink').textContent = 'Уже есть аккаунт? Войти'; setTimeout(() => { document.getElementById('modalOverlay').classList.add('active'); }, 200); }
+    function deleteAccount() {
+        const session = getSession();
+        if (!session) return;
+        const key = session.nick.toLowerCase();
+        const users = getUsers();
+        delete users[key];
+        saveUsers(users);
+        logout();
+    }
     document.addEventListener('click', (e) => { const menu = document.getElementById('nickMenu'); const nick = document.getElementById('headerNick'); if (!menu.contains(e.target) && !nick.contains(e.target)) { menu.classList.remove('active'); } });
     function showOverlay() { document.getElementById('overlay').classList.add('active'); }
     function hideOverlay() { document.getElementById('overlay').classList.remove('active'); }
