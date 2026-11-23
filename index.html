@@ -64,7 +64,7 @@
         <div class="modal">
             <h2 id="modalTitle">Регистрация</h2>
             <p id="modalDesc">Придумайте никнейм и пароль</p>
-            <input type="text" id="nickInput" placeholder="Ваш никнейм" maxlength="20" autocomplete="off">
+            <input type="text" id="nickInput" placeholder="Ваш никнейм" maxlength="15" autocomplete="off">
             <input type="password" id="passInput" placeholder="Пароль" maxlength="30">
             <button class="modal-btn" id="submitBtn" onclick="submitForm()">Войти</button>
             <div class="modal-error" id="modalError"></div>
@@ -121,7 +121,7 @@
         err.textContent = '';
         if (!nick) { err.textContent = 'Введите никнейм'; return; }
         if (nick.length < 2) { err.textContent = 'Минимум 2 символа'; return; }
-        if (!/^[a-zA-Z0-9_\-]+$/.test(nick)) { err.textContent = 'Только английские буквы, цифры, _ и -'; return; }
+        if (!/^[a-zA-Zа-яА-ЯёЁ0-9_\-]+$/.test(nick)) { err.textContent = 'Только буквы, цифры, _ и -'; return; }
         if (!pass) { err.textContent = 'Введите пароль'; return; }
         if (pass.length < 4) { err.textContent = 'Минимум 4 символа'; return; }
         btn.disabled = true;
