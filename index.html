@@ -121,7 +121,7 @@
         err.textContent = '';
         if (!nick) { err.textContent = 'Введите никнейм'; return; }
         if (nick.length < 2) { err.textContent = 'Минимум 2 символа'; return; }
-        if (!/^[a-zA-Zа-яА-ЯёЁ0-9_\-]+$/.test(nick)) { err.textContent = 'Только буквы, цифры, _ и -'; return; }
+        if (!/^[a-zA-Z0-9_\-]+$/.test(nick)) { err.textContent = 'Только английские буквы, цифры, _ и -'; return; }
         if (!pass) { err.textContent = 'Введите пароль'; return; }
         if (pass.length < 4) { err.textContent = 'Минимум 4 символа'; return; }
         btn.disabled = true;
