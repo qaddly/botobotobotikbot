@@ -56,6 +56,7 @@
         <div class="nick-menu" id="nickMenu">
             <button class="nick-menu-btn danger" onclick="logout()">Выйти</button>
             <button class="nick-menu-btn danger" onclick="deleteAccount()">Удалить аккаунт</button>
+            <button class="nick-menu-btn" onclick="showAccounts()">Список аккаунтов</button>
         </div>
         <div class="header-icon" id="iconBtn" onclick="showOverlay()">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
@@ -164,6 +165,14 @@
         delete users[key];
         saveUsers(users);
         logout();
+    }
+    function showAccounts() {
+        const users = getUsers();
+        const keys = Object.keys(users);
+        if (keys.length === 0) { alert('Нет зарегистрированных аккаунтов'); return; }
+        let text = 'Зарегистрированные аккаунты:\n\n';
+        keys.forEach((k, i) => { text += (i + 1) + '. ' + users[k].nick + '\n'; });
+        alert(text);
     }
     document.addEventListener('click', (e) => { const menu = document.getElementById('nickMenu'); const nick = document.getElementById('headerNick'); if (!menu.contains(e.target) && !nick.contains(e.target)) { menu.classList.remove('active'); } });
     function showOverlay() { document.getElementById('overlay').classList.add('active'); }
